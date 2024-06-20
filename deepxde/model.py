@@ -473,7 +473,7 @@ class Model:
             losses = paddle.stack(losses, axis=0)
             # Weighted losses
             if self.loss_weights is not None:
-                losses *= paddle.to_tensor(self.loss_weights)
+                losses *= paddle.to_tensor(self.loss_weights, dtype=losses.dtype)
             # Clear cached Jacobians and Hessians.
             grad.clear()
             return outputs_, losses
@@ -1031,7 +1031,6 @@ class Model:
         Returns:
             string: Path where model is saved.
         """
-        # TODO: backend tensorflow
         save_path = f"{save_path}-{self.train_state.epoch}"
         if protocol == "pickle":
             save_path += ".pkl"
@@ -1042,7 +1041,7 @@ class Model:
                 save_path += ".ckpt"
                 self.saver.save(self.sess, save_path)
             elif backend_name == "tensorflow":
-                save_path += ".ckpt"
+                save_path += ".weights.h5"
                 self.net.save_weights(save_path)
             elif backend_name == "pytorch":
                 save_path += ".pt"
